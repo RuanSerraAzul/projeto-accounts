@@ -67,6 +67,7 @@ function construirConta() {
                     )
                 );
                 construirConta();
+                return;
             }
 
             fs.writeFileSync(
