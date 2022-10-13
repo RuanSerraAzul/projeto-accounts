@@ -25,6 +25,19 @@ function operation() {
                 ],
             },
         ])
-        .then()
+        .then((answer) => {
+            const action = answer["action"];
+
+            if (action === "Criar conta") {
+                criarConta();
+            }
+        })
         .catch((err) => console.log(err));
+}
+
+//criar conta
+
+function criarConta() {
+    console.log(chalk.bgGreen.black("Obrigado por utilizar o Accounts!"));
+    console.log(chalk.green("Defina as opções da sua conta a seguir:"));
 }
