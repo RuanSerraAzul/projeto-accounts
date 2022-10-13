@@ -119,14 +119,7 @@ function deposito() {
                 .then((answer) => {
                     const amount = answer["amount"];
 
-                    if (amount >= 0) {
-                        console.log(
-                            chalk.bgRed.black(
-                                "Erro, não é possível depositar um valor negativo"
-                            )
-                        );
-                        process.exit();
-                    }
+                    fazerDeposito(accountName, amount);
 
                     operation();
                 })
@@ -146,4 +139,40 @@ function checkAccount(accountName) {
     }
 
     return true;
+}
+
+function fazerDeposito(accountName, amount) {
+    const accountData = pegarConta(accountName);
+
+    if (amount <= 0 || !amount) {
+        console.log(
+            chalk.bgRed.black("Ocorreu um erro, tente digitar um valor válido")
+        );
+        process.exit();
+    }
+
+    accountData.balance = parseFloat(amount) + parseFloat(accountData.balance);
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function (err) {
+            console.log(err);
+        }
+    );
+
+    console.log(
+        chalk.green(
+            `Foi depósitado o valor de R$ ${amount} na conta ${accountName}`
+        )
+    );
+}
+
+function pegarConta(accountName) {
+    const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
+        encoding: "utf8",
+        flag: "r",
+    });
+
+    return JSON.parse(accountJSON);
 }
