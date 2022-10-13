@@ -36,7 +36,7 @@ function operation() {
             } else if (action === "Depositar") {
                 deposito();
             } else if (action === "Sacar") {
-                console.log(action);
+                sacar();
             } else if (action === "Sair") {
                 console.log(chalk.bgBlue.black("Obrigado por usar o accounts"));
                 process.exit();
@@ -205,4 +205,76 @@ function pegarValorConta() {
         .catch((err) => {
             console.log(err);
         });
+}
+
+function sacar() {
+    inquirer
+        .prompt([
+            {
+                name: "accountName",
+                message: "Digite o nome da conta onde será feito o saque:",
+            },
+        ])
+        .then((answer) => {
+            const accountName = answer["accountName"];
+
+            if (!checkAccount(accountName)) {
+                return sacar();
+            }
+
+            inquirer
+                .prompt([
+                    {
+                        name: "amount",
+                        message: "Digite o valor que você quer sacar:",
+                    },
+                ])
+                .then((answer) => {
+                    const amount = answer["amount"];
+
+                    fazerSaque(accountName, amount);
+
+                    operation();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        })
+        .catch((err) => console.log(err));
+}
+
+function fazerSaque(accountName, amount) {
+    const accountData = pegarConta(accountName);
+
+    if (amount <= 0 || !amount) {
+        console.log(
+            chalk.bgRed.black("Ocorreu um erro, tente digitar um valor válido")
+        );
+        process.exit();
+    }
+
+    if (amount > accountData.balance) {
+        console.log(
+            chalk.bgRed.black(
+                "Ocorreu um erro, você está tentando sacar um valor maior que o que você possui em sua conta."
+            )
+        );
+        process.exit();
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount);
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function (err) {
+            console.log(err);
+        }
+    );
+
+    console.log(
+        chalk.green(
+            `Foi sacado o valor de R$ ${amount} na conta ${accountName}`
+        )
+    );
 }
