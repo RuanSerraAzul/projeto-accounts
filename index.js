@@ -32,7 +32,7 @@ function operation() {
                 criarConta();
                 construirConta();
             } else if (action === "Consultar saldo") {
-                console.log(action);
+                pegarValorConta();
             } else if (action === "Depositar") {
                 deposito();
             } else if (action === "Sacar") {
@@ -133,7 +133,7 @@ function deposito() {
 function checkAccount(accountName) {
     if (!fs.existsSync(`accounts/${accountName}.json`)) {
         console.log(
-            chalk.bgRed.black("Esta conta não existem, tente novamente!")
+            chalk.bgRed.black("Esta conta não existe, tente novamente!")
         );
         return false;
     }
@@ -175,4 +175,34 @@ function pegarConta(accountName) {
     });
 
     return JSON.parse(accountJSON);
+}
+
+function pegarValorConta() {
+    inquirer
+        .prompt([
+            {
+                name: "accountName",
+                message: "Qual nome da sua conta? ",
+            },
+        ])
+        .then((answer) => {
+            const accountName = answer["accountName"];
+
+            if (!checkAccount(accountName)) {
+                return pegarValorConta();
+            }
+
+            const accountData = pegarConta(accountName);
+
+            console.log(
+                chalk.bgBlueBright.black(
+                    `Seu saldo é de R$ ${accountData.balance}`
+                )
+            );
+
+            operation();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 }
