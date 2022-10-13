@@ -108,6 +108,31 @@ function deposito() {
             if (!checkAccount(accountName)) {
                 return deposito();
             }
+
+            inquirer
+                .prompt([
+                    {
+                        name: "amount",
+                        message: "Digite o valor que você quer depositar:",
+                    },
+                ])
+                .then((answer) => {
+                    const amount = answer["amount"];
+
+                    if (amount >= 0) {
+                        console.log(
+                            chalk.bgRed.black(
+                                "Erro, não é possível depositar um valor negativo"
+                            )
+                        );
+                        process.exit();
+                    }
+
+                    operation();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         })
         .catch((err) => console.log(err));
 }
