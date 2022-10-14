@@ -45,7 +45,55 @@ function operation() {
         .catch((err) => console.log(err));
 }
 
-//criar conta
+function checkAccount(accountName) {
+    if (!fs.existsSync(`accounts/${accountName}.json`)) {
+        console.log(
+            chalk.bgRed.black("Esta conta não existe, tente novamente!")
+        );
+        return false;
+    }
+
+    return true;
+}
+
+function pegarConta(accountName) {
+    const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
+        encoding: "utf8",
+        flag: "r",
+    });
+
+    return JSON.parse(accountJSON);
+}
+
+function pegarValorConta() {
+    inquirer
+        .prompt([
+            {
+                name: "accountName",
+                message: "Qual nome da sua conta? ",
+            },
+        ])
+        .then((answer) => {
+            const accountName = answer["accountName"];
+
+            if (!checkAccount(accountName)) {
+                return pegarValorConta();
+            }
+
+            const accountData = pegarConta(accountName);
+
+            console.log(
+                chalk.bgBlueBright.black(
+                    `Seu saldo é de R$ ${accountData.balance}`
+                )
+            );
+
+            operation();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
 
 function criarConta() {
     console.log(chalk.bgGreen.black("Obrigado por utilizar o Accounts!"));
@@ -94,6 +142,33 @@ function construirConta() {
         .catch((err) => console.log(err));
 }
 
+function fazerDeposito(accountName, amount) {
+    const accountData = pegarConta(accountName);
+
+    if (amount <= 0 || !amount) {
+        console.log(
+            chalk.bgRed.black("Ocorreu um erro, tente digitar um valor válido")
+        );
+        process.exit();
+    }
+
+    accountData.balance = parseFloat(amount) + parseFloat(accountData.balance);
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function (err) {
+            console.log(err);
+        }
+    );
+
+    console.log(
+        chalk.green(
+            `Foi depósitado o valor de R$ ${amount} na conta ${accountName}`
+        )
+    );
+}
+
 function deposito() {
     inquirer
         .prompt([
@@ -128,83 +203,6 @@ function deposito() {
                 });
         })
         .catch((err) => console.log(err));
-}
-
-function checkAccount(accountName) {
-    if (!fs.existsSync(`accounts/${accountName}.json`)) {
-        console.log(
-            chalk.bgRed.black("Esta conta não existe, tente novamente!")
-        );
-        return false;
-    }
-
-    return true;
-}
-
-function fazerDeposito(accountName, amount) {
-    const accountData = pegarConta(accountName);
-
-    if (amount <= 0 || !amount) {
-        console.log(
-            chalk.bgRed.black("Ocorreu um erro, tente digitar um valor válido")
-        );
-        process.exit();
-    }
-
-    accountData.balance = parseFloat(amount) + parseFloat(accountData.balance);
-
-    fs.writeFileSync(
-        `accounts/${accountName}.json`,
-        JSON.stringify(accountData),
-        function (err) {
-            console.log(err);
-        }
-    );
-
-    console.log(
-        chalk.green(
-            `Foi depósitado o valor de R$ ${amount} na conta ${accountName}`
-        )
-    );
-}
-
-function pegarConta(accountName) {
-    const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
-        encoding: "utf8",
-        flag: "r",
-    });
-
-    return JSON.parse(accountJSON);
-}
-
-function pegarValorConta() {
-    inquirer
-        .prompt([
-            {
-                name: "accountName",
-                message: "Qual nome da sua conta? ",
-            },
-        ])
-        .then((answer) => {
-            const accountName = answer["accountName"];
-
-            if (!checkAccount(accountName)) {
-                return pegarValorConta();
-            }
-
-            const accountData = pegarConta(accountName);
-
-            console.log(
-                chalk.bgBlueBright.black(
-                    `Seu saldo é de R$ ${accountData.balance}`
-                )
-            );
-
-            operation();
-        })
-        .catch((err) => {
-            console.log(err);
-        });
 }
 
 function sacar() {
